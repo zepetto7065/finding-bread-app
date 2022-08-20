@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:finding_bread_app/shop_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -56,24 +55,24 @@ class _ShopListPageState extends State<ShopListPage> {
       itemCount: _datas.length,
       itemBuilder: (context, index) {
         final shop = _datas[index];
-        return GestureDetector(
-          onTap: () => {
-          Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ShopDetailPage())
-          )
-        },
-          child: Card(
-            child: Row(
-              children: [
-                SizedBox(
-                    width: 80.0,
-                    height: 80.0,
-                    child: Image.network(
-                        "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")
-                ),
-                SizedBox(
-                  width: 300,
+        return Card(
+          child: Row(
+            children: [
+              SizedBox(
+                  width: 80.0,
+                  height: 80.0,
+                  child: Image.network(
+                      "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")
+              ),
+              SizedBox(
+                width: 300,
+                child: GestureDetector(
+                  onTap: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context)=>ShopDetailPage(shop.id))
+                    );
+                  },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -89,9 +88,9 @@ class _ShopListPageState extends State<ShopListPage> {
                       )
                     ],
                   ),
-                )
-              ],
-            ),
+                ),
+              )
+            ],
           ),
         );
       },
