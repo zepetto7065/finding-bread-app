@@ -1,24 +1,27 @@
+import 'package:finding_bread_app/http_page.dart';
+import 'package:finding_bread_app/shop_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class IndexPage extends StatefulWidget {
-  const IndexPage({Key? key}) : super(key: key);
 
   @override
   State<IndexPage> createState() => _IndexPageState();
 }
 
 class _IndexPageState extends State<IndexPage> {
-  TextEditingController _textController = TextEditingController();
+  final TextEditingController _textController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return _buildBody();
   }
 
   Widget _buildBody() {
+
     return Center(
       child: Container(
-          width: 200,
+          width: 250,
           height: 150,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -37,18 +40,26 @@ class _IndexPageState extends State<IndexPage> {
               Row(
                 children: [
                   SizedBox(
-                    width: 150,
+                    width: 170,
                     height: 30,
                     child: TextField(
                       controller: _textController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: 'Hint'
+                        labelText: '이름, 지역을 검색해주세요.'
                       ),
                     ),
                   ),
                   Padding(padding: EdgeInsets.all(5.0)),
-                  Text('검색')
+                  ElevatedButton(
+                    child: Text('검색'),
+                    onPressed: () {
+                      Navigator.push(
+                        context ,
+                        MaterialPageRoute(builder: (context) => ShopListPage(_textController.text))
+                      );
+                    },
+                  )
                 ],
               ),
             ],
