@@ -3,22 +3,18 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class ShopListPage extends StatefulWidget {
-  String data;
-
-  ShopListPage(this.data);
-
+class HttpPage extends StatefulWidget {
   @override
-  State<ShopListPage> createState() => _ShopListPageState();
+  State<HttpPage> createState() => _HttpPageState();
 }
 
-class _ShopListPageState extends State<ShopListPage> {
+class _HttpPageState extends State<HttpPage> {
   List<Shop> _datas = [];
-  var _text = "";
+  var _text = "Http Example";
 
   void getShopList(query) async {
     String url = 'http://zepetto.synology.me:9090/api/shops?query=';
-    final response = await http.get(Uri.parse(url + query));
+    final response = await http.get(Uri.parse(url + '금천'));
     _text = utf8.decode(response.bodyBytes);
 
     var dataObjsJson = jsonDecode(_text)['data'] as List;
@@ -30,45 +26,31 @@ class _ShopListPageState extends State<ShopListPage> {
     });
 
   }
+
   @override
   void initState() {
     super.initState();
-    getShopList(widget.data);
+    getShopList('금천');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: _buildAppBar(),
-        body: _buldBody()
-      );
-  }
-
-  _buildAppBar() {
-    return AppBar(
-    title: Text(widget.data),
-      actions: [
-        IconButton(onPressed: () {}
-            , icon: Icon(Icons.send)
-        )
-      ],
-    );
-  }
-
-  _buldBody() {
-    return Center(
-      child: ListView.builder(
-        itemCount: _datas.length,
-        itemBuilder:(context,  index) {
-          final shop = _datas[index];
-          return ListTile(
-              title: Text(shop.title)
-          );
-        },
+      appBar: AppBar(
       ),
+      body: Center(
+        child: ListView.builder(
+            itemCount: _datas.length,
+            itemBuilder:(context,  index) {
+              final shop = _datas[index];
+              return ListTile(
+                title: Text(shop.title)
+              );
+            },
+        ),
+      )
     );
   }
-
 }
 
 class Shop {
@@ -97,19 +79,19 @@ class Shop {
   });
 
   factory Shop.fromJson(Map<String, dynamic> json) {
-    return Shop(
-      id: json['id'] as int,
-      title: json['title'] as String,
-      link: json['link'] as String,
-      address: json['address'] as String,
-      // telephone: json['telephone'] as String,
-      roadAddress: json['roadAddress'] as String,
-      mapx: json['mapx'] as int,
-      mapy: json['mapy'] as int,
-      createdDate: json['createdDate'] as String,
-      modifiedDate: json['modifiedDate'] as String,
-    );
-  }
+      return Shop(
+        id: json['id'] as int,
+        title: json['title'] as String,
+        link: json['link'] as String,
+        address: json['address'] as String,
+        // telephone: json['telephone'] as String,
+        roadAddress: json['roadAddress'] as String,
+        mapx: json['mapx'] as int,
+        mapy: json['mapy'] as int,
+        createdDate: json['createdDate'] as String,
+        modifiedDate: json['modifiedDate'] as String,
+      );
+    }
 
   @override
   String toString() {
