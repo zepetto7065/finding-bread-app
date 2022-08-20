@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:finding_bread_app/shop_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -22,14 +23,15 @@ class _ShopListPageState extends State<ShopListPage> {
     _text = utf8.decode(response.bodyBytes);
 
     var dataObjsJson = jsonDecode(_text)['data'] as List;
-    List<Shop> parsedResponse = dataObjsJson.map((e) => Shop.fromJson(e)).toList();
+    List<Shop> parsedResponse =
+    dataObjsJson.map((e) => Shop.fromJson(e)).toList();
 
     setState(() {
       _datas.clear();
       _datas.addAll(parsedResponse);
     });
-
   }
+
   @override
   void initState() {
     super.initState();
@@ -38,37 +40,63 @@ class _ShopListPageState extends State<ShopListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: _buildAppBar(),
-        body: _buldBody()
-      );
+    return Scaffold(appBar: _buildAppBar(), body: _buldBody());
   }
 
   _buildAppBar() {
     return AppBar(
-    title: Text(widget.data),
-      actions: [
-        IconButton(onPressed: () {}
-            , icon: Icon(Icons.send)
-        )
-      ],
+      title: Text(widget.data),
+      actions: [IconButton(onPressed: () {}, icon: Icon(Icons.send))],
+      backgroundColor: Colors.brown,
     );
   }
 
   _buldBody() {
-    return Center(
-      child: ListView.builder(
-        itemCount: _datas.length,
-        itemBuilder:(context,  index) {
-          final shop = _datas[index];
-          return ListTile(
-              title: Text(shop.title)
-          );
+    return ListView.builder(
+      itemCount: _datas.length,
+      itemBuilder: (context, index) {
+        final shop = _datas[index];
+        return GestureDetector(
+          onTap: () => {
+          Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ShopDetailPage())
+          )
         },
-      ),
+          child: Card(
+            child: Row(
+              children: [
+                SizedBox(
+                    width: 80.0,
+                    height: 80.0,
+                    child: Image.network(
+                        "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")
+                ),
+                SizedBox(
+                  width: 300,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        shop.title,
+                      ),
+                      Text(
+                        shop.address,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                          '평점 5.0'
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
-
 }
 
 class Shop {
@@ -76,6 +104,7 @@ class Shop {
   final String title;
   final String link;
   final String address;
+
   // final String telephone;
   final String roadAddress;
   final int mapx;
@@ -83,8 +112,7 @@ class Shop {
   final String createdDate;
   final String modifiedDate;
 
-  Shop({
-    required this.id,
+  Shop({required this.id,
     required this.title,
     required this.link,
     required this.address,
@@ -93,8 +121,7 @@ class Shop {
     required this.mapx,
     required this.mapy,
     required this.createdDate,
-    required this.modifiedDate
-  });
+    required this.modifiedDate});
 
   factory Shop.fromJson(Map<String, dynamic> json) {
     return Shop(
