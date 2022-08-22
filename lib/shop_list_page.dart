@@ -84,7 +84,7 @@ class _ShopListPageState extends State<ShopListPage> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                          '평점 5.0'
+                          'review 28개'
                       )
                     ],
                   ),

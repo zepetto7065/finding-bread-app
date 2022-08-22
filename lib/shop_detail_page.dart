@@ -69,21 +69,33 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
                     "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")),
           ),
           Padding(padding: EdgeInsets.all(8.0)),
-          Text(' 주소 : ' + snapshot.data!.address.toString(),
+          Text(' 주소  ' + snapshot.data!.address.toString(),
               style: TextStyle(
                 fontSize: 15.0,
                 fontWeight: FontWeight.w200,
               )),
           Padding(padding: EdgeInsets.all(4.0)),
-          Text(' 번호 : 01091085420'),
+          Text(' 연락처  01091085420'),
           Padding(padding: EdgeInsets.all(4.0)),
-          Text(' 영업상황 : 영업중/오늘 휴무/영업전/알수없음'),
+          Text(' 영업상황  영업중/오늘 휴무/영업전/알수없음'),
           Padding(padding: EdgeInsets.all(8.0)),
-          Text(' 방문후기',
-              style: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.w200,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(' 방문후기',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w200,
+                  )
+              ),
+              ElevatedButton.icon(
+                icon: Icon(Icons.create),
+                onPressed:(){
+
+                },
+                label: Text('후기작성'),
               )
+            ],
           ),
           Expanded(
             child: ListView.builder(
@@ -104,6 +116,7 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
                           Text(' 맛 : 정말 맛있어요'),
                           Text(' 서비스 : 그냥그래요'),
                           Text(' 재방문 : 네!'),
+                          Text(' 최애빵 : 소금빵'),
                           Text(' 간략후기 : 아주 맛있는 맛있에요'),
                         ],
                       )
