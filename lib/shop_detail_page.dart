@@ -1,3 +1,4 @@
+import 'package:finding_bread_app/review_write_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -91,7 +92,7 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
               ElevatedButton.icon(
                 icon: Icon(Icons.create),
                 onPressed:(){
-
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ReviewWritePage(widget.id)));
                 },
                 label: Text('후기작성'),
               )

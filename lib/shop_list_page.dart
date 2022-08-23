@@ -13,7 +13,7 @@ class ShopListPage extends StatefulWidget {
 }
 
 class _ShopListPageState extends State<ShopListPage> {
-  List<Shop> _datas = [];
+  final List<Shop> _datas = [];
   var _text = "";
 
   void getShopList(query) async {
@@ -22,8 +22,7 @@ class _ShopListPageState extends State<ShopListPage> {
     _text = utf8.decode(response.bodyBytes);
 
     var dataObjsJson = jsonDecode(_text)['data'] as List;
-    List<Shop> parsedResponse =
-    dataObjsJson.map((e) => Shop.fromJson(e)).toList();
+    List<Shop> parsedResponse = dataObjsJson.map((e) => Shop.fromJson(e)).toList();
 
     setState(() {
       _datas.clear();
