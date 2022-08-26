@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:finding_bread_app/shop_detail_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 class ShopListPage extends StatefulWidget {
@@ -38,14 +40,23 @@ class _ShopListPageState extends State<ShopListPage> {
 
   @override
   Widget build(BuildContext context) {
+    return _build();
+  }
+
+  Widget _build() {
     return Scaffold(appBar: _buildAppBar(), body: _buldBody());
   }
 
   _buildAppBar() {
     return AppBar(
       title: Text(widget.data),
-      actions: [IconButton(onPressed: () {}, icon: Icon(Icons.send))],
       backgroundColor: Colors.brown,
+    );
+  }
+
+  _buildNavigationBar() {
+    return CupertinoNavigationBar(
+      middle: Text(widget.data),
     );
   }
 
@@ -54,17 +65,20 @@ class _ShopListPageState extends State<ShopListPage> {
       itemCount: _datas.length,
       itemBuilder: (context, index) {
         final shop = _datas[index];
-        return Card(
+        return Container(
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.black12, width: 1)
+          ),
           child: Row(
             children: [
               SizedBox(
-                  width: 80.0,
-                  height: 80.0,
+                  width: 70.0,
+                  height: 70.0,
                   child: Image.network(
                       "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")
               ),
               SizedBox(
-                width: 300,
+                width: 220,
                 child: GestureDetector(
                   onTap: (){
                     Navigator.push(
@@ -83,7 +97,7 @@ class _ShopListPageState extends State<ShopListPage> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                          'review 28개'
+                          'review ${shop.reviewsCount}'
                       )
                     ],
                   ),
@@ -95,6 +109,7 @@ class _ShopListPageState extends State<ShopListPage> {
       },
     );
   }
+
 }
 
 class Shop {
@@ -110,6 +125,8 @@ class Shop {
   final String createdDate;
   final String modifiedDate;
 
+  final int? reviewsCount;
+
   Shop({required this.id,
     required this.title,
     required this.link,
@@ -119,11 +136,12 @@ class Shop {
     required this.mapx,
     required this.mapy,
     required this.createdDate,
-    required this.modifiedDate});
+    required this.modifiedDate,
+    required this.reviewsCount});
 
   factory Shop.fromJson(Map<String, dynamic> json) {
     return Shop(
-      id: json['id'] as int,
+      id: json['shopId'] as int,
       title: json['title'] as String,
       link: json['link'] as String,
       address: json['address'] as String,
@@ -133,6 +151,7 @@ class Shop {
       mapy: json['mapy'] as int,
       createdDate: json['createdDate'] as String,
       modifiedDate: json['modifiedDate'] as String,
+      reviewsCount: json['reviewsCount'] as int
     );
   }
 

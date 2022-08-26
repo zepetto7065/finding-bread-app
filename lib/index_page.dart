@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:finding_bread_app/shop_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -41,28 +43,48 @@ class _IndexPageState extends State<IndexPage> {
                   SizedBox(
                     width: 170,
                     height: 30,
-                    child: TextField(
-                      controller: _textController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: '이름, 지역을 검색해주세요.'
-                      ),
-                    ),
+                    child: _textField(),
                   ),
                   Padding(padding: EdgeInsets.all(5.0)),
                   ElevatedButton(
                     child: Text('검색'),
                     onPressed: () {
-                      Navigator.push(
-                        context ,
-                        MaterialPageRoute(builder: (context) => ShopListPage(_textController.text))
-                      );
+                      onGenerate();
                     },
                   )
                 ],
               ),
             ],
           )),
+    );
+  }
+
+  void onGenerate() {
+    if(Platform.isAndroid){
+      Navigator.push(
+        context ,
+        MaterialPageRoute(builder: (context) => ShopListPage(_textController.text))
+      );
+    }
+    Navigator.push(
+        context,
+      CupertinoPageRoute(builder: (context) => ShopListPage(_textController.text))
+    );
+  }
+
+  StatefulWidget _textField() {
+    if(Platform.isAndroid) {
+      return TextField(
+        controller: _textController,
+        decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: '이름, 지역을 검색해주세요.'
+        ),
+      );
+    }
+    return CupertinoTextField(
+      controller: _textController,
+      keyboardType: TextInputType.text,
     );
   }
 }
