@@ -193,7 +193,7 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
                 child: Text('추가!'),
                 onPressed: (){
                   _postReviewRequest(widget.id);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => ShopDetailPage(widget.id)));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => ShopDetailPage(widget.id,null)));
                 },
               ),
             )

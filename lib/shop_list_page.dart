@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:finding_bread_app/shop_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,36 +14,44 @@ class ShopListPage extends StatefulWidget {
 }
 
 class _ShopListPageState extends State<ShopListPage> {
-  final List<Shop> _datas = [];
-  var _text = "";
 
-  void getShopList(query) async {
+  Future<List<Shop>> getShopList(query) async {
     String url = 'http://zepetto.synology.me:9090/api/shops?query=';
     final response = await http.get(Uri.parse(url + query));
-    _text = utf8.decode(response.bodyBytes);
+    var _text = utf8.decode(response.bodyBytes);
 
     var dataObjsJson = jsonDecode(_text)['data'] as List;
     List<Shop> parsedResponse = dataObjsJson.map((e) => Shop.fromJson(e)).toList();
 
-    setState(() {
-      _datas.clear();
-      _datas.addAll(parsedResponse);
-    });
+    return parsedResponse;
   }
 
   @override
   void initState() {
     super.initState();
-    getShopList(widget.data);
   }
 
   @override
   Widget build(BuildContext context) {
-    return _build();
+    return FutureBuilder<List<Shop>>(
+        future: getShopList(widget.data),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            List<Shop> shop =snapshot.data!;
+            return _build(shop);
+          } else if (snapshot.hasError) {
+            return Text('${snapshot.error} 에러!!');
+          }
+          return const SizedBox(
+              height: 10.0,
+              width: 10.0,
+              child: CircularProgressIndicator()
+          );        },
+    );
   }
 
-  Widget _build() {
-    return Scaffold(appBar: _buildAppBar(), body: _buldBody());
+  Widget _build(List<Shop> shop) {
+    return Scaffold(appBar: _buildAppBar(), body: _buldBody(shop));
   }
 
   _buildAppBar() {
@@ -54,17 +61,20 @@ class _ShopListPageState extends State<ShopListPage> {
     );
   }
 
-  _buildNavigationBar() {
-    return CupertinoNavigationBar(
-      middle: Text(widget.data),
-    );
-  }
+  _buldBody(List<Shop> shop) {
+    if(shop.isEmpty){
+      return Center(
+          child: Text(
+              '데이터가 없습니다 😋',
+            style: TextStyle(fontSize: 30.0),
+          )
+      );
+    }
 
-  _buldBody() {
     return ListView.builder(
-      itemCount: _datas.length,
+      itemCount: shop.length,
       itemBuilder: (context, index) {
-        final shop = _datas[index];
+        final item = shop[index];
         return Container(
           decoration: BoxDecoration(
               border: Border.all(color: Colors.black12, width: 1)
@@ -83,21 +93,21 @@ class _ShopListPageState extends State<ShopListPage> {
                   onTap: (){
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context)=>ShopDetailPage(shop.id))
+                      MaterialPageRoute(builder: (context)=>ShopDetailPage(item.id, null))
                     );
                   },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        shop.title,
+                        item.title,
                       ),
                       Text(
-                        shop.address,
+                        item.address,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                          'review ${shop.reviewsCount}'
+                          'review ${item.reviewsCount}'
                       )
                     ],
                   ),

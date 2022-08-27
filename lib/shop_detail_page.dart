@@ -1,3 +1,4 @@
+import 'package:finding_bread_app/login_page.dart';
 import 'package:finding_bread_app/review_write_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -5,9 +6,10 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ShopDetailPage extends StatefulWidget {
-  int id;
+  int shopId;
+  int? userId;
 
-  ShopDetailPage(this.id);
+  ShopDetailPage(this.shopId, this.userId);
 
   @override
   State<ShopDetailPage> createState() => _ShopDetailPageState();
@@ -34,7 +36,7 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
   @override
   void initState() {
     super.initState();
-    shop = getShop(widget.id);
+    shop = getShop(widget.shopId);
   }
 
   @override
@@ -98,10 +100,7 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
               IconButton(
                 icon: Icon(Icons.add),
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ReviewWritePage(widget.id)));
+                  onPressedReviewBtn();
                 },
               )
             ],
@@ -114,7 +113,33 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
     );
   }
 
+  void onPressedReviewBtn() {
+    if(widget.userId != null){
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ReviewWritePage(widget.shopId)));
+    }
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => LoginPage()));
+  }
+
   _buildReview() {
+    if(reviews.isEmpty){
+      return Container(
+        decoration: BoxDecoration(
+            border: Border.all(color: Colors.black12, width: 1)
+        ),
+        child: Center(
+            child: Text(
+              '아직 후기가 없어요! 😋',
+              style: TextStyle(fontSize: 30.0),
+            )
+        ),
+      );
+    }
     return ListView.builder(
       itemCount: reviews.length,
       itemBuilder: (context, index) {
@@ -239,4 +264,14 @@ class Review {
       modifiedDate: json['modifiedDate'] as String,
     );
   }
+}
+
+class User{
+
+  final int id;
+  final String name;
+
+  User(this.id, this.name);
+
+
 }
