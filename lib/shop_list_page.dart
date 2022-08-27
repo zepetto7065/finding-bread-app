@@ -42,7 +42,7 @@ class _ShopListPageState extends State<ShopListPage> {
           } else if (snapshot.hasError) {
             return Text('${snapshot.error} 에러!!');
           }
-          return SizedBox(
+          return const SizedBox(
               height: 10.0,
               width: 10.0,
               child: CircularProgressIndicator()
@@ -93,7 +93,7 @@ class _ShopListPageState extends State<ShopListPage> {
                   onTap: (){
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context)=>ShopDetailPage(item.id))
+                      MaterialPageRoute(builder: (context)=>ShopDetailPage(item.id, null))
                     );
                   },
                   child: Column(
