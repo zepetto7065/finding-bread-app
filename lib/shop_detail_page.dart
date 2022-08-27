@@ -115,6 +115,19 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
   }
 
   _buildReview() {
+    if(reviews.isEmpty){
+      return Container(
+        decoration: BoxDecoration(
+            border: Border.all(color: Colors.black12, width: 1)
+        ),
+        child: Center(
+            child: Text(
+              '데이터가 없습니다 😋',
+              style: TextStyle(fontSize: 30.0),
+            )
+        ),
+      );
+    }
     return ListView.builder(
       itemCount: reviews.length,
       itemBuilder: (context, index) {
