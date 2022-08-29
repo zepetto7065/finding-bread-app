@@ -5,9 +5,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class ShopDetailPage extends StatefulWidget {
   int shopId;
   int? userId;
+  String? token;
 
   ShopDetailPage(this.shopId, this.userId);
 
@@ -113,17 +116,22 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
     );
   }
 
-  void onPressedReviewBtn() {
-    if(widget.userId != null){
-        Navigator.push(
+   onPressedReviewBtn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final appToken = prefs.getString('token') ?? '';
+
+    if(appToken == ''){
+      widget.token = await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => LoginPage()));
+
+    }else{
+         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => ReviewWritePage(widget.shopId)));
+                builder: (context) => ReviewWritePage(widget.shopId, widget.token)));
     }
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => LoginPage()));
   }
 
   _buildReview() {

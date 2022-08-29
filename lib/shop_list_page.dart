@@ -58,6 +58,7 @@ class _ShopListPageState extends State<ShopListPage> {
     return AppBar(
       title: Text(widget.data),
       backgroundColor: Colors.brown,
+
     );
   }
 

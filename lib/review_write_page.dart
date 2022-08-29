@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'package:finding_bread_app/shop_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class ReviewWritePage extends StatefulWidget {
   int id;
+  String? token;
 
-  ReviewWritePage(this.id);
+  ReviewWritePage(this.id, this.token);
 
   @override
   State<ReviewWritePage> createState() => _ReviewWritePageState();
@@ -28,7 +30,6 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
     return Scaffold(
       appBar:  AppBar(
         title: Text('후기'),
-        actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.send))],
         backgroundColor: Colors.brown,
       ),
       body: buildBody(),
@@ -193,7 +194,7 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
                 child: Text('추가!'),
                 onPressed: (){
                   _postReviewRequest(widget.id);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => ShopDetailPage(widget.id,null)));
+                  Navigator.pop(context);
                 },
               ),
             )
@@ -213,10 +214,14 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
     service = getService(service);
     revisit = getRevisit(revisit);
 
+    final prefs = await SharedPreferences.getInstance();
+    final appToken = prefs.getString('token') ?? '';
+
     http.Response response = await http.post(Uri.parse(url),
       headers: <String, String> {
         'Content-Type': 'application/json',
-        'Accept' : 'application/json'
+        'Accept' : 'application/json',
+        'Authorization' : 'Bearer ' + appToken
       },
       body:  jsonEncode({
         'shopId' : shopId,
@@ -227,6 +232,27 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
         'detailReview' : _detailReview.text
       }),
     );
+
+    if(response.statusCode == 401){
+      showDialog(
+          context: context,
+          barrierDismissible: false, // user must tap button!
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Text('권한이 없습니다.'),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.pop(context, "OK");
+                  },
+                ),
+              ],
+            );
+          }
+      );
+    }
+
     return jsonDecode(utf8.decode(response.bodyBytes));
   }
 
