@@ -58,6 +58,7 @@ class _ShopListPageState extends State<ShopListPage> {
     return AppBar(
       title: Text(widget.data),
       backgroundColor: Colors.brown,
+
     );
   }
 
@@ -65,8 +66,8 @@ class _ShopListPageState extends State<ShopListPage> {
     if(shop.isEmpty){
       return Center(
           child: Text(
-              '데이터가 없습니다 😋',
-            style: TextStyle(fontSize: 30.0),
+              '검색 결과가 없습니다. 😋',
+            style: TextStyle(fontSize: 25.0),
           )
       );
     }
@@ -107,7 +108,7 @@ class _ShopListPageState extends State<ShopListPage> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                          'review ${item.reviewsCount}'
+                          '💬${item.reviewsCount}개'
                       )
                     ],
                   ),

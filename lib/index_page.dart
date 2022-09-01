@@ -37,7 +37,18 @@ class _IndexPageState extends State<IndexPage> {
                     color: Colors.brown
                 ),
               ),
-              Padding(padding: EdgeInsets.all(10.0)),
+              Padding(padding: EdgeInsets.all(5.0)),
+              Text(
+                '빵집을 찾아드립니다',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    letterSpacing: 2.0,
+                    color: Colors.brown
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(5.0)),
               Row(
                 children: [
                   SizedBox(

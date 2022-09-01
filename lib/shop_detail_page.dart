@@ -3,11 +3,15 @@ import 'package:finding_bread_app/review_write_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShopDetailPage extends StatefulWidget {
   int shopId;
   int? userId;
+  String? token;
 
   ShopDetailPage(this.shopId, this.userId);
 
@@ -19,6 +23,7 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
   Future<Shop>? shop;
   String title = "";
   List<Review> reviews = [];
+  String link = "";
 
   Future<Shop> getShop(shopId) async {
     String url = 'http://zepetto.synology.me:9090/api/shops/';
@@ -62,68 +67,124 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
 
   Widget buildArea(snapshot) {
     Shop shop = snapshot.data!;
+    link = shop.link!;
+    link = link ==  '' ? '정보없음' : link;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
         backgroundColor: Colors.brown,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: SizedBox(
-                width: 300.0,
-                height: 150.0,
-                child: Image.network(
-                    "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")),
-          ),
-          Padding(padding: EdgeInsets.all(8.0)),
-          Text(' 주소  ${shop.address}',
-              style: TextStyle(
-                fontSize: 15.0,
-                fontWeight: FontWeight.w200,
-              )),
-          Padding(padding: EdgeInsets.all(4.0)),
-          const Text(' 연락처  01091085420'),
-          Padding(padding: EdgeInsets.all(4.0)),
-          const Text(' 영업상황  영업중/오늘 휴무/영업전/알수없음'),
-          Padding(padding: EdgeInsets.all(8.0)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(' 방문후기',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w200,
-                  )),
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () {
-                  onPressedReviewBtn();
-                },
-              )
-            ],
-          ),
-          Expanded(
-            child: _buildReview(),
-          )
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: SizedBox(
+                  width: 300.0,
+                  height: 150.0,
+                  child: Image.network(
+                      "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")),
+            ),
+            Padding(padding: EdgeInsets.all(4.0)),
+            Row(
+              children: [
+                SizedBox(
+                  width: 50,
+                  child: Text(' 주소 ',
+                      style: TextStyle(
+                        fontSize: 15.0,
+                      )),
+                ),
+                SizedBox(
+                  width: 220,
+                  child: Text('${shop.address}',
+                    style: TextStyle(
+                      fontSize: 13.0,
+                    ),
+                    overflow: TextOverflow.fade,
+                  ),
+                ),
+                IconButton(
+                  onPressed: (){
+                    Clipboard.setData(ClipboardData(text:shop.address));
+                  },
+                  icon: Icon(Icons.copy),
+                ),
+              ]
+            ),
+            Padding(padding: EdgeInsets.all(2.0)),
+            Row(
+              children: [
+                SizedBox(
+                  width: 50,
+                  child: Text(' 연락처 ',
+                      style: TextStyle(
+                        fontSize: 15.0,
+                      )),
+                ),
+                Text('01091085420'),
+              ]
+            ),
+            Padding(padding: EdgeInsets.all(2.0)),
+            Row(
+              children: [
+                SizedBox(
+                  width: 50,
+                  child: Text(' 링크')
+                ),
+                SizedBox(
+                  width: 250,
+                  child: InkWell(
+                   child: Text(link,
+                          overflow: TextOverflow.fade   ,
+                          ),
+                    onTap: _launchUrl
+                  )
+                ),
+              ],
+            ),
+            Padding(padding: EdgeInsets.all(2.0)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(' 방문후기 '+shop.reviewsCount.toString(),
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w200,
+                    )),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () {
+                    onPressedReviewBtn();
+                  },
+                )
+              ],
+            ),
+            _buildReview()
+          ],
+        ),
       ),
     );
   }
 
-  void onPressedReviewBtn() {
-    if(widget.userId != null){
-        Navigator.push(
+   onPressedReviewBtn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final appToken = prefs.getString('token') ?? '';
+
+    if(appToken == ''){
+      widget.token = await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => LoginPage()));
+
+    }else{
+         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => ReviewWritePage(widget.shopId)));
+                builder: (context) => ReviewWritePage(widget.shopId, widget.token)));
     }
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => LoginPage()));
   }
 
   _buildReview() {
@@ -135,12 +196,14 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
         child: Center(
             child: Text(
               '아직 후기가 없어요! 😋',
-              style: TextStyle(fontSize: 30.0),
+              style: TextStyle(fontSize: 25.0),
             )
         ),
       );
     }
     return ListView.builder(
+      shrinkWrap: true, //list in list
+      physics: NeverScrollableScrollPhysics(),
       itemCount: reviews.length,
       itemBuilder: (context, index) {
         Review review = reviews[index];
@@ -151,38 +214,51 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
           child: Row(
             children: [
               SizedBox(
-                  width: 70.0,
-                  height: 70.0,
-                  child: Image.network(
-                      "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")),
-              SizedBox(
-                width: 200,
+                width: 230,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      children: [
+                        Text('👤SWANI'),
+                        Padding(padding: EdgeInsets.all(3.0)),
+                        Text(review.createdDate,style: const TextStyle(fontSize: 10.0),),
+                      ],
+                    ),
+                    Padding(padding: EdgeInsets.all(3.0)),
                     Text(' 맛 : ${review.flavor}'),
                     Text(' 서비스 : ${review.service}'),
-                    Text(' 재방문 : ${review.revisit}'),
                     Text(' 최애빵 : ${review.favoriteBread}'),
-                    Text(
-                      ' 간략후기 : ${review.detailReview}',
-                      maxLines: 5,
-                    ),
+                    Text(' 상세후기 : ${review.detailReview}'),
                   ],
                 ),
-              )
+              ),
+              SizedBox(
+                  width: 70.0,
+                  height: 70.0,
+                  child: Image.network(
+                      "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")
+              ),
             ],
           ),
         );
       },
     );
   }
+
+  Future<void> _launchUrl() async{
+    Uri url = Uri.parse(link);
+    if(!await launchUrl(url)){
+      throw 'could not launch';
+    }
+  }
+
 }
 
 class Shop {
   final int id;
   final String title;
-  final String link;
+  final String? link;
   final String address;
 
   // final String? telephone;
@@ -198,7 +274,7 @@ class Shop {
   Shop(
       {required this.id,
       required this.title,
-      required this.link,
+       this.link,
       required this.address,
       // this.telephone,
       required this.roadAddress,
@@ -213,7 +289,7 @@ class Shop {
     return Shop(
         id: json['shopId'] as int,
         title: json['title'] as String,
-        link: json['link'] as String,
+        link: json['link'] as String?,
         address: json['address'] as String,
         // telephone: json['telephone'] as String?,
         roadAddress: json['roadAddress'] as String,
@@ -232,6 +308,8 @@ class Shop {
 }
 
 class Review {
+  //nickname
+  //날짜
   final int id;
   final String flavor;
   final String service;
