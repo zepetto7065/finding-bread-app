@@ -1,7 +1,8 @@
 import 'dart:convert';
-import 'package:finding_bread_app/shop_detail_page.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -18,11 +19,9 @@ class ReviewWritePage extends StatefulWidget {
 class _ReviewWritePageState extends State<ReviewWritePage> {
   Flavor? _flavor = Flavor.GOOD;
   Service? _service = Service.GOOD;
-  Revisit? _revisit = Revisit.YES;
   final TextEditingController _favoriteBread = TextEditingController();
   final TextEditingController _detailReview = TextEditingController();
-  // final File? _image;
-  // final ImagePicker _picker = ImagePicker();
+  File? _image;
 
 
   @override
@@ -90,7 +89,7 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
                 )
               ],
             ),
-            Padding(padding: EdgeInsets.all(8.0)),
+            Padding(padding: EdgeInsets.all(2.0)),
             Text('서비스는 어때요?',
               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),),
             Column(
@@ -126,68 +125,47 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
                 ),
               ],
             ),
-            Padding(padding: EdgeInsets.all(8.0)),
-            Text('재방문하고 싶나요?',
-              style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(
-                  child: RadioListTile<Revisit>(
-                    title: Text('네!',
-                      style: TextStyle(fontSize: 12.0),
-                    ),
-                    value: Revisit.YES,
-                    groupValue: _revisit,
-                    onChanged: (Revisit? value){
-                      setState(() {
-                        _revisit = value;
-                      });
-                    },
-                  ),
-                ),
-                SizedBox(
-                  child: RadioListTile<Revisit>(
-                    title: Text('아니요',
-                      style: TextStyle(fontSize: 12.0),
-                    ),
-                    value: Revisit.NO,
-                    groupValue: _revisit,
-                    onChanged: (Revisit? value){
-                      setState(() {
-                        _revisit = value;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            Padding(padding: EdgeInsets.all(8.0)),
+            Padding(padding: EdgeInsets.all(2.0)),
             Text('최애빵이 궁금해요🥰',
               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),),
             Padding(padding: EdgeInsets.all(8.0)),
-            TextField(
-              controller: _favoriteBread,
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: '내용을 입력해주세요.'
+            SizedBox(
+              height: 60,
+              child: TextField(
+                maxLength: 10,
+                controller: _favoriteBread,
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: '내용을 입력해주세요.'
+                ),
               ),
             ),
-            Padding(padding: EdgeInsets.all(8.0)),
+            Padding(padding: EdgeInsets.all(2.0)),
             Text('간략후기',
               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),),
-            Padding(padding: EdgeInsets.all(8.0)),
-            TextField(
-              controller: _detailReview,
-              keyboardType: TextInputType.multiline,
-              minLines: 1,
-              maxLines: 5,
-              maxLength: 100,
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: '후기를 작성해주세요.'
+            Padding(padding: EdgeInsets.all(2.0)),
+            SizedBox(
+              height: 60,
+              child: TextField(
+                controller: _detailReview,
+                keyboardType: TextInputType.multiline,
+                minLines: 1,
+                maxLines: 5,
+                maxLength: 100,
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: '후기를 작성해주세요.'
+                ),
               ),
             ),
+            Padding(padding: EdgeInsets.all(4.0)),
+            Text('업로드',
+              style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),),
+            IconButton(
+              onPressed: _getImage,
+              icon: Icon(Icons.add_a_photo),
+            ),
+            _image == null ? Text('No Image') : Image.file(_image!),
             Container(
               alignment: Alignment.center,
               child: ElevatedButton(
@@ -208,11 +186,10 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
     String url = 'http://zepetto.synology.me:9090/api/reviews';
     String flavor = "";
     String service = "";
-    String revisit = "";
+    print(_image);
 
     flavor = getFlavor(flavor);
     service = getService(service);
-    revisit = getRevisit(revisit);
 
     final prefs = await SharedPreferences.getInstance();
     final appToken = prefs.getString('token') ?? '';
@@ -227,7 +204,6 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
         'shopId' : shopId,
         'flavor' : flavor,
         'service' : service,
-        'revisit' : revisit,
         'favoriteBread' : _favoriteBread.text,
         'detailReview' : _detailReview.text
       }),
@@ -256,15 +232,6 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
     return jsonDecode(utf8.decode(response.bodyBytes));
   }
 
-  String getRevisit(String revisit) {
-    if(_revisit == Revisit.YES){
-      revisit = "네";
-    }else{
-      revisit = "아니요";
-    }
-    return revisit;
-  }
-
   String getService(String service) {
     if(_service == Service.GOOD){
       service = "친절해요";
@@ -284,19 +251,29 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
     }
     return flavor;
   }
+
+  Future<void> _getImage() async {
+    XFile? image = await ImagePicker().pickImage(
+        source: ImageSource.gallery
+    );
+
+    if(image != null){
+      setState(() {
+        _image = File(image.path);
+      });
+    }
+  }
 }
 
 class Review {
   String flavor;
   String service;
-  String revisit;
   String favoriteBread;
   String review;
 
   Review(
-      this.flavor, this.service, this.revisit, this.favoriteBread, this.review);
+      this.flavor, this.service, this.favoriteBread, this.review);
 
 }
 enum Flavor { GOOD, SOSO, BAD }
 enum Service { GOOD, BAD }
-enum Revisit { YES, NO }

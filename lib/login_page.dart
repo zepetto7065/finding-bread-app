@@ -57,11 +57,13 @@ class _LoginPageState extends State<LoginPage> {
                 Padding(padding: EdgeInsets.all(2.0)),
                 ElevatedButton(
                   onPressed: () async {
-                    setToken();
-                    final prefs = await SharedPreferences.getInstance();
-                    final appToken = prefs.getString('token') ?? '';
-                    if(appToken != null){
-                      Navigator.pop(context, appToken);
+                    if(validCheck()){
+                      setToken();
+                      final prefs = await SharedPreferences.getInstance();
+                      final appToken = prefs.getString('token') ?? '';
+                      if(appToken != null){
+                        Navigator.pop(context, appToken);
+                      }
                     }
                   },
                   child: Text('로그인'),
@@ -100,10 +102,46 @@ class _LoginPageState extends State<LoginPage> {
       }),
     );
 
-    var _text = utf8.decode(response.bodyBytes);
+    if(response.statusCode == 200){
+      var _text = utf8.decode(response.bodyBytes);
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('token',jsonDecode(_text)['token']);
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('token',jsonDecode(_text)['token']);
+    }else{
+      showAlertDialog(context,"로그인 정보가 적절치 않습니다.");
+    }
+  }
+
+  bool validCheck() {
+    if(email.text == ""){
+      showAlertDialog(context,"이메일을 입력해주세요.");
+      return false;
+    }
+    if(password.text == ""){
+      showAlertDialog(context,"비밀번호를 입력해주세요.");
+      return false;
+    }
+    return true;
+  }
+
+  void showAlertDialog(BuildContext context, String text) async {
+    await showDialog(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Text(text),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.pop(context, "OK");
+                },
+              ),
+            ],
+          );
+        }
+    );
   }
 }
 

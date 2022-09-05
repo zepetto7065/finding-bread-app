@@ -115,19 +115,19 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
               ]
             ),
             Padding(padding: EdgeInsets.all(2.0)),
-            Row(
-              children: [
-                SizedBox(
-                  width: 50,
-                  child: Text(' 연락처 ',
-                      style: TextStyle(
-                        fontSize: 15.0,
-                      )),
-                ),
-                Text('01091085420'),
-              ]
-            ),
-            Padding(padding: EdgeInsets.all(2.0)),
+            // Row(
+            //   children: [
+            //     SizedBox(
+            //       width: 50,
+            //       child: Text(' 연락처 ',
+            //           style: TextStyle(
+            //             fontSize: 15.0,
+            //           )),
+            //     ),
+            //     Text('01091085420'),
+            //   ]
+            // ),
+            // Padding(padding: EdgeInsets.all(2.0)),
             Row(
               children: [
                 SizedBox(
