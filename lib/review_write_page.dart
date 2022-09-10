@@ -21,7 +21,12 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
   Service? _service = Service.GOOD;
   final TextEditingController _favoriteBread = TextEditingController();
   final TextEditingController _detailReview = TextEditingController();
-  File? _image;
+  File? _image1;
+  File? _image2;
+  File? _image3;
+  String imageUrl1 = "";
+  String imageUrl2 = "";
+  String imageUrl3 = "";
 
 
   @override
@@ -130,7 +135,6 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),),
             Padding(padding: EdgeInsets.all(8.0)),
             SizedBox(
-              height: 60,
               child: TextField(
                 maxLength: 10,
                 controller: _favoriteBread,
@@ -143,9 +147,8 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
             Padding(padding: EdgeInsets.all(2.0)),
             Text('간략후기',
               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),),
-            Padding(padding: EdgeInsets.all(2.0)),
+            Padding(padding: EdgeInsets.all(4.0)),
             SizedBox(
-              height: 60,
               child: TextField(
                 controller: _detailReview,
                 keyboardType: TextInputType.multiline,
@@ -165,12 +168,15 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
               onPressed: _getImage,
               icon: Icon(Icons.add_a_photo),
             ),
-            _image == null ? Text('No Image') : Image.file(_image!),
+            _image1 == null ? Text('No Image') : Image.file(_image1!),
             Container(
               alignment: Alignment.center,
               child: ElevatedButton(
                 child: Text('추가!'),
                 onPressed: (){
+                  if(_image1 != null || _image1 != ''){
+                    postImageRequest();
+                  }
                   _postReviewRequest(widget.id);
                   Navigator.pop(context);
                 },
@@ -186,26 +192,29 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
     String url = 'http://zepetto.synology.me:9090/api/reviews';
     String flavor = "";
     String service = "";
-    print(_image);
+    List<String> imageUrl =[imageUrl1,imageUrl2,imageUrl3];
 
     flavor = getFlavor(flavor);
     service = getService(service);
 
     final prefs = await SharedPreferences.getInstance();
     final appToken = prefs.getString('token') ?? '';
+    final userId = prefs.getString('userId') ?? '';
 
     http.Response response = await http.post(Uri.parse(url),
       headers: <String, String> {
         'Content-Type': 'application/json',
         'Accept' : 'application/json',
-        'Authorization' : 'Bearer ' + appToken
+        'Authorization' : 'Bearer $appToken'
       },
       body:  jsonEncode({
         'shopId' : shopId,
+        'userId' : userId,
         'flavor' : flavor,
         'service' : service,
         'favoriteBread' : _favoriteBread.text,
-        'detailReview' : _detailReview.text
+        'detailReview' : _detailReview.text,
+        'imageUrlList' : imageUrl
       }),
     );
 
@@ -253,14 +262,68 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
   }
 
   Future<void> _getImage() async {
-    XFile? image = await ImagePicker().pickImage(
-        source: ImageSource.gallery
-    );
+    List<XFile>? images = await ImagePicker().pickMultiImage();
 
-    if(image != null){
-      setState(() {
-        _image = File(image.path);
-      });
+
+    if(images != null){
+      if(images.length <= 3){
+        setState(() {
+          _image1 = File(images[0].path);
+          _image2 = File(images[1].path);
+          _image3 = File(images[2].path);
+        });
+      }else{
+        print('이미지는 최대 3개까지 등록이 가능합니다.');
+      }
+    }
+  }
+
+  Future<dynamic> postImageRequest() async {
+    print('후기 사진을 업로드');
+    String baseUrl = "https://finding-bread-app.s3.ap-northeast-2.amazonaws.com/review/";
+    if(_image1 != null){
+      var split = _image1!.path.split('.');
+      var extension = split[split.length-1];
+
+      String fileName = '${widget.id}_${DateTime.now().microsecondsSinceEpoch}.${extension}';
+      imageUrl1 = fileName;
+
+      await requestUpload(extension, baseUrl + fileName, _image1! );
+    }
+    if(_image2 != null){
+      var split = _image2!.path.split('.');
+      var extension = split[split.length-1];
+
+      String fileName = '${widget.id}_${DateTime.now().microsecondsSinceEpoch}.${extension}';
+      imageUrl2 = fileName;
+
+      await requestUpload(extension, baseUrl + fileName, _image2! );
+    }
+    if(_image3 != null){
+      var split = _image3!.path.split('.');
+      var extension = split[split.length-1];
+
+      String fileName = '${widget.id}_${DateTime.now().microsecondsSinceEpoch}.${extension}';
+      imageUrl3 = fileName;
+
+      await requestUpload(extension, baseUrl + fileName, _image3! );
+    }
+  }
+
+  Future<void> requestUpload(String extension, String uri, File image) async {
+    try {
+      var response = await http.put(
+          Uri.parse(uri),
+          body: image.readAsBytesSync(),
+          headers: {
+            'Content-Type': 'image/$extension'
+          }
+      );
+      if (response.statusCode == 200) {
+        print('${image.path} ::: 성공적으로 업로드했습니다.');
+      }
+    }catch(e){
+      print(e);
     }
   }
 }
@@ -269,10 +332,10 @@ class Review {
   String flavor;
   String service;
   String favoriteBread;
-  String review;
+  List<String> imageUrl;
 
   Review(
-      this.flavor, this.service, this.favoriteBread, this.review);
+      this.flavor, this.service, this.favoriteBread, this.imageUrl);
 
 }
 enum Flavor { GOOD, SOSO, BAD }

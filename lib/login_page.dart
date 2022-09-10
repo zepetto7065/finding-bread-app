@@ -27,64 +27,62 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildBody(){
-    return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            child: Column(
-              children: [
-                Text('로그인',
-                  style: TextStyle(
-                    fontSize: 30.0
+    return SingleChildScrollView(
+      child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              child: Column(
+                children: [
+                  Text('로그인',
+                    style: TextStyle(
+                      fontSize: 30.0
+                    ),
                   ),
-                ),
-                Padding(padding: EdgeInsets.all(8.0)),
-                TextField(
-                  controller: email,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: '아이디 입력'
+                  Padding(padding: EdgeInsets.all(8.0)),
+                  TextField(
+                    controller: email,
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: '아이디 입력'
+                    ),
                   ),
-                ),
-                Padding(padding: EdgeInsets.all(4.0)),
-                TextField(
-                  controller: password,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: '비밀번호 입력'
+                  Padding(padding: EdgeInsets.all(4.0)),
+                  TextField(
+                    obscureText: true,
+                    controller: password,
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: '비밀번호 입력'
+                    ),
                   ),
-                ),
-                Padding(padding: EdgeInsets.all(2.0)),
-                ElevatedButton(
-                  onPressed: () async {
-                    if(validCheck()){
-                      setToken();
-                      final prefs = await SharedPreferences.getInstance();
-                      final appToken = prefs.getString('token') ?? '';
-                      if(appToken != null){
-                        Navigator.pop(context, appToken);
+                  Padding(padding: EdgeInsets.all(2.0)),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if(validCheck()){
+                        setToken();
                       }
-                    }
-                  },
-                  child: Text('로그인'),
-                ),
-                Row(
-                  children: [
-                    Text('아직 Finding Bread 계정이 없나요?'),
-                    TextButton(
-                        onPressed: (){
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SignUpPage()));
-                        },
-                        child: Text('회원가입'))
-                  ],
-                )
-              ],
+                    },
+                    child: Text('로그인'),
+                  ),
+                  Row(
+                    children: [
+                      Text('아직 Finding Bread 계정이 없나요?'),
+                      TextButton(
+                          onPressed: (){
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => SignUpPage()));
+                          },
+                          child: Text('회원가입'))
+                    ],
+                  )
+                ],
+              ),
             ),
-          ),
-        )
+          )
+      ),
     );
   }
 
@@ -104,12 +102,27 @@ class _LoginPageState extends State<LoginPage> {
 
     if(response.statusCode == 200){
       var _text = utf8.decode(response.bodyBytes);
-
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString('token',jsonDecode(_text)['token']);
+
+      prefs.setString('token' ,jsonDecode(_text)['token']);
+      prefs.setString('userId' ,jsonDecode(_text)['userId']);
+      prefs.setString('email' ,jsonDecode(_text)['email']);
+      prefs.setString('nickname' ,jsonDecode(_text)['nickname']);
+      final appToken = prefs.getString('token');
+
+      Navigator.pop(context, appToken);
     }else{
-      showAlertDialog(context,"로그인 정보가 적절치 않습니다.");
+      print('로그인 실패');
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Text('로그인 실패'),
+            );
+          }
+      );
     }
+
   }
 
   bool validCheck() {
