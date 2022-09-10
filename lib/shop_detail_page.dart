@@ -82,10 +82,12 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
           children: [
             Center(
               child: SizedBox(
-                  width: 300.0,
-                  height: 150.0,
                   child: Image.network(
-                      "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")),
+                      "https://finding-bread-app.s3.ap-northeast-2.amazonaws.com/review/118_1662629387789782.jpg",
+                      fit: BoxFit.fill,
+                  ),
+
+              ),
             ),
             Padding(padding: EdgeInsets.all(4.0)),
             Row(
@@ -220,7 +222,7 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
                   children: [
                     Row(
                       children: [
-                        Text('👤SWANI'),
+                        Text('👤${review.nickname}'),
                         Padding(padding: EdgeInsets.all(3.0)),
                         Text(review.createdDate,style: const TextStyle(fontSize: 10.0),),
                       ],
@@ -310,20 +312,22 @@ class Shop {
 class Review {
   //nickname
   //날짜
-  final int id;
+  final int reviewId;
+  final int userId;
+  final String nickname;
   final String flavor;
   final String service;
-  final String revisit;
   final String favoriteBread;
   final String detailReview;
   final String createdDate;
   final String modifiedDate;
 
   Review({
-    required this.id,
+    required this.reviewId,
+    required this.userId,
+    required this.nickname,
     required this.flavor,
     required this.service,
-    required this.revisit,
     required this.favoriteBread,
     required this.detailReview,
     required this.createdDate,
@@ -332,10 +336,11 @@ class Review {
 
   factory Review.fromJson(Map<String, dynamic> json) {
     return Review(
-      id: json['id'] as int,
+      reviewId: json['reviewId'] as int,
+      userId: json['userId'] as int,
+      nickname: json['nickname'] as String,
       flavor: json['flavor'] as String,
       service: json['service'] as String,
-      revisit: json['revisit'] as String,
       favoriteBread: json['favoriteBread'] as String,
       detailReview: json['detailReview'] as String,
       createdDate: json['createdDate'] as String,
