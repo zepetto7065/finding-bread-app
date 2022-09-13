@@ -1,3 +1,4 @@
+import 'package:card_swiper/card_swiper.dart';
 import 'package:finding_bread_app/login_page.dart';
 import 'package:finding_bread_app/review_write_page.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,8 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
   String title = "";
   List<Review> reviews = [];
   String link = "";
+  String defaulImageUrl = "";
+  String uploadImageUrl = "";
 
   Future<Shop> getShop(shopId) async {
     String url = 'http://zepetto.synology.me:9090/api/shops/';
@@ -117,19 +120,6 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
               ]
             ),
             Padding(padding: EdgeInsets.all(2.0)),
-            // Row(
-            //   children: [
-            //     SizedBox(
-            //       width: 50,
-            //       child: Text(' 연락처 ',
-            //           style: TextStyle(
-            //             fontSize: 15.0,
-            //           )),
-            //     ),
-            //     Text('01091085420'),
-            //   ]
-            // ),
-            // Padding(padding: EdgeInsets.all(2.0)),
             Row(
               children: [
                 SizedBox(
@@ -209,11 +199,26 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
       itemCount: reviews.length,
       itemBuilder: (context, index) {
         Review review = reviews[index];
+        List<String> images = [];
+
+        var imageUrl = "";
+        if(review.imageUrl == null || review.imageUrl == '' ){
+          imageUrl = "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000";
+          images.add(imageUrl);
+        }else{
+          var split = review.imageUrl!.split("|");
+          for(var item in split){
+            imageUrl = "https://finding-bread-app.s3.ap-northeast-2.amazonaws.com/review/$item";
+            images.add(imageUrl);
+          }
+        }
+
         return Container(
           decoration: BoxDecoration(
                 border: Border.all(color: Colors.black12, width: 1)
           ),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               SizedBox(
                 width: 230,
@@ -236,10 +241,38 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
                 ),
               ),
               SizedBox(
-                  width: 70.0,
-                  height: 70.0,
-                  child: Image.network(
-                      "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")
+                  width: 60.0,
+                  height: 60.0,
+                  child: InkWell(
+                    onTap: (){
+                      showDialog(
+                          context: context,
+                          barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                              ),
+                              content:  Swiper(
+                                    itemBuilder: (context, index) {
+                                      final url = images[index];
+                                      return Image.network(url);
+                                    },
+                                    indicatorLayout: PageIndicatorLayout.COLOR,
+                                    autoplay: false,
+                                    itemCount: images.length,
+                                    pagination: const SwiperPagination(),
+                                  ),
+                              );
+                          }
+                      );                    },
+                    child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20.0),
+                              child: Image.network(
+                                imageUrl,
+                              ),
+                          ),
+                  )
               ),
             ],
           ),
@@ -310,8 +343,6 @@ class Shop {
 }
 
 class Review {
-  //nickname
-  //날짜
   final int reviewId;
   final int userId;
   final String nickname;
@@ -319,6 +350,7 @@ class Review {
   final String service;
   final String favoriteBread;
   final String detailReview;
+  String? imageUrl;
   final String createdDate;
   final String modifiedDate;
 
@@ -330,6 +362,7 @@ class Review {
     required this.service,
     required this.favoriteBread,
     required this.detailReview,
+    this.imageUrl,
     required this.createdDate,
     required this.modifiedDate
 });
@@ -343,6 +376,7 @@ class Review {
       service: json['service'] as String,
       favoriteBread: json['favoriteBread'] as String,
       detailReview: json['detailReview'] as String,
+      imageUrl: json['imageUrl'] as String?,
       createdDate: json['createdDate'] as String,
       modifiedDate: json['modifiedDate'] as String,
     );

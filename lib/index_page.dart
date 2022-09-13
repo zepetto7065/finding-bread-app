@@ -65,6 +65,14 @@ class _IndexPageState extends State<IndexPage> {
                   )
                 ],
               ),
+              Padding(padding: EdgeInsets.all(10.0)),
+              Text(
+                  '원하는 빵집을 요청할 수 있어요!',
+                style: TextStyle(
+                    fontSize: 10.0,
+                  decoration: TextDecoration.underline,
+                ),
+              )
             ],
           )),
     );
