@@ -105,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
       prefs.setString('token' ,jsonDecode(_text)['token']);
-      prefs.setString('userId' ,jsonDecode(_text)['userId']);
+      prefs.setInt('userId' ,jsonDecode(_text)['userId']);
       prefs.setString('email' ,jsonDecode(_text)['email']);
       prefs.setString('nickname' ,jsonDecode(_text)['nickname']);
       final appToken = prefs.getString('token');

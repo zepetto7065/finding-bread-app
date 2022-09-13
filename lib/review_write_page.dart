@@ -164,11 +164,42 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
             Padding(padding: EdgeInsets.all(4.0)),
             Text('업로드',
               style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold),),
-            IconButton(
-              onPressed: _getImage,
-              icon: Icon(Icons.add_a_photo),
+            Row(
+              children: [
+                IconButton(
+                  iconSize: 30,
+                  onPressed: _getImage,
+                  icon: Icon(Icons.add_a_photo_outlined),
+                ),
+                Padding(padding: EdgeInsets.all(2.0)),
+                _image1 != null ? SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20.0),
+                      child: Image.file(_image1!)
+                  ),
+                ) : Text('사진을 추가해주세요!') ,
+                Padding(padding: EdgeInsets.all(2.0)),
+                _image2 != null ? SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20.0),
+                      child: Image.file(_image2!)
+                  ),
+                ) : Text('') ,
+                Padding(padding: EdgeInsets.all(2.0)),
+                _image3 != null ? SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20.0),
+                      child: Image.file(_image3!)
+                  ),
+                ) : Text('') ,
+              ],
             ),
-            _image1 == null ? Text('No Image') : Image.file(_image1!),
             Container(
               alignment: Alignment.center,
               child: ElevatedButton(
@@ -199,7 +230,7 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
 
     final prefs = await SharedPreferences.getInstance();
     final appToken = prefs.getString('token') ?? '';
-    final userId = prefs.getString('userId') ?? '';
+    final userId = prefs.getInt('userId') ?? '';
 
     http.Response response = await http.post(Uri.parse(url),
       headers: <String, String> {
@@ -268,17 +299,35 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
     if(images != null){
       if(images.length <= 3){
         setState(() {
-          _image1 = File(images[0].path);
-          _image2 = File(images[1].path);
-          _image3 = File(images[2].path);
+          _image1 = null;
+          _image2 = null;
+          _image3 = null;
+          if(images.length == 3){
+            _image1 = File(images[0].path);
+            _image2 = File(images[1].path);
+            _image3 = File(images[2].path);
+          }else if(images.length == 2){
+            _image1 = File(images[0].path);
+            _image2 = File(images[1].path);
+          }else if(images.length == 1){
+            _image1 = File(images[0].path);
+          }
         });
       }else{
         print('이미지는 최대 3개까지 등록이 가능합니다.');
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: Text('이미지는 최대 3개까지 등록이 가능합니다.'),
+              );
+            }
+        );
       }
     }
   }
 
-  Future<dynamic> postImageRequest() async {
+  postImageRequest()  {
     print('후기 사진을 업로드');
     String baseUrl = "https://finding-bread-app.s3.ap-northeast-2.amazonaws.com/review/";
     if(_image1 != null){
@@ -288,7 +337,7 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
       String fileName = '${widget.id}_${DateTime.now().microsecondsSinceEpoch}.${extension}';
       imageUrl1 = fileName;
 
-      await requestUpload(extension, baseUrl + fileName, _image1! );
+      requestUpload(extension, baseUrl + fileName, _image1! );
     }
     if(_image2 != null){
       var split = _image2!.path.split('.');
@@ -297,7 +346,7 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
       String fileName = '${widget.id}_${DateTime.now().microsecondsSinceEpoch}.${extension}';
       imageUrl2 = fileName;
 
-      await requestUpload(extension, baseUrl + fileName, _image2! );
+      requestUpload(extension, baseUrl + fileName, _image2! );
     }
     if(_image3 != null){
       var split = _image3!.path.split('.');
@@ -306,7 +355,7 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
       String fileName = '${widget.id}_${DateTime.now().microsecondsSinceEpoch}.${extension}';
       imageUrl3 = fileName;
 
-      await requestUpload(extension, baseUrl + fileName, _image3! );
+      requestUpload(extension, baseUrl + fileName, _image3! );
     }
   }
 
@@ -326,6 +375,7 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
       print(e);
     }
   }
+
 }
 
 class Review {
