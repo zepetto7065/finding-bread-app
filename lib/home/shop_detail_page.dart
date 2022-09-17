@@ -1,6 +1,8 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:finding_bread_app/login_page.dart';
-import 'package:finding_bread_app/review_write_page.dart';
+import 'package:finding_bread_app/home/review_write_page.dart';
+import 'package:finding_bread_app/root_page.dart';
+import 'package:finding_bread_app/tab_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -23,10 +25,12 @@ class ShopDetailPage extends StatefulWidget {
 class _ShopDetailPageState extends State<ShopDetailPage> {
   Future<Shop>? shop;
   String title = "";
-  List<Review> reviews = [];
+  List<Review>? reviews;
+  int? reviewsCount;
   String link = "";
   String defaulImageUrl = "";
   String uploadImageUrl = "";
+  var refreshKey = GlobalKey<RefreshIndicatorState>();
 
   Future<Shop> getShop(shopId) async {
     String url = 'http://zepetto.synology.me:9090/api/shops/';
@@ -53,13 +57,14 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
       future: shop,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          reviews = snapshot.data!.reviews;
+          reviews = reviews == null ? snapshot.data!.reviews : reviews;
+          reviewsCount = reviewsCount == null ? snapshot.data!.reviewsCount : reviewsCount;
           title = snapshot.data!.title.toString();
           return buildArea(snapshot);
         } else if (snapshot.hasError) {
           return Text('${snapshot.error} 에러!!');
         }
-        return SizedBox(
+        return const SizedBox(
             height: 10.0,
             width: 10.0,
             child: CircularProgressIndicator()
@@ -78,88 +83,94 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
         title: Text(title),
         backgroundColor: Colors.brown,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: SizedBox(
-                  child: Image.network(
-                      "https://finding-bread-app.s3.ap-northeast-2.amazonaws.com/review/118_1662629387789782.jpg",
-                      fit: BoxFit.fill,
-                  ),
-
-              ),
-            ),
-            Padding(padding: EdgeInsets.all(4.0)),
-            Row(
-              children: [
-                SizedBox(
-                  width: 50,
-                  child: Text(' 주소 ',
-                      style: TextStyle(
-                        fontSize: 15.0,
-                      )),
-                ),
-                SizedBox(
-                  width: 220,
-                  child: Text('${shop.address}',
-                    style: TextStyle(
-                      fontSize: 13.0,
+      body: RefreshIndicator(
+        key: refreshKey,
+        onRefresh: refreshList,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: SizedBox(
+                    child: Image.network(
+                        "https://finding-bread-app.s3.ap-northeast-2.amazonaws.com/review/118_1662629387789782.jpg",
+                        fit: BoxFit.fill,
                     ),
-                    overflow: TextOverflow.fade,
+
+                ),
+              ),
+              Padding(padding: EdgeInsets.all(4.0)),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 50,
+                    child: Text(' 주소 ',
+                        style: TextStyle(
+                          fontSize: 15.0,
+                        )),
                   ),
-                ),
-                IconButton(
-                  onPressed: (){
-                    Clipboard.setData(ClipboardData(text:shop.address));
-                  },
-                  icon: Icon(Icons.copy),
-                ),
-              ]
-            ),
-            Padding(padding: EdgeInsets.all(2.0)),
-            Row(
-              children: [
-                SizedBox(
-                  width: 50,
-                  child: Text(' 링크')
-                ),
-                SizedBox(
-                  width: 250,
-                  child: InkWell(
-                   child: Text(link,
-                          overflow: TextOverflow.fade   ,
-                          ),
-                    onTap: _launchUrl
+                  SizedBox(
+                    width: 220,
+                    child: Text('${shop.address}',
+                      style: TextStyle(
+                        fontSize: 13.0,
+                      ),
+                      overflow: TextOverflow.fade,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: (){
+                      Clipboard.setData(ClipboardData(text:shop.address));
+                    },
+                    icon: Icon(Icons.copy),
+                  ),
+                ]
+              ),
+              Padding(padding: EdgeInsets.all(2.0)),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 50,
+                    child: Text(' 링크')
+                  ),
+                  SizedBox(
+                    width: 250,
+                    child: InkWell(
+                     child: Text(link,
+                            overflow: TextOverflow.fade   ,
+                            ),
+                      onTap: _launchUrl
+                    )
+                  ),
+                ],
+              ),
+              Padding(padding: EdgeInsets.all(2.0)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(' 방문후기 '+reviewsCount.toString(),
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w200,
+                      )),
+                  IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: () {
+                      onPressedReviewBtn();
+                    },
                   )
-                ),
-              ],
-            ),
-            Padding(padding: EdgeInsets.all(2.0)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(' 방문후기 '+shop.reviewsCount.toString(),
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.w200,
-                    )),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    onPressedReviewBtn();
-                  },
-                )
-              ],
-            ),
-            _buildReview()
-          ],
+                ],
+              ),
+              _buildReview()
+            ],
+          ),
         ),
       ),
     );
   }
+
+
 
    onPressedReviewBtn() async {
     final prefs = await SharedPreferences.getInstance();
@@ -170,7 +181,6 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
           context,
           MaterialPageRoute(
               builder: (context) => LoginPage()));
-
     }else{
          Navigator.push(
             context,
@@ -180,25 +190,24 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
   }
 
   _buildReview() {
-    if(reviews.isEmpty){
-      return Container(
-        decoration: BoxDecoration(
-            border: Border.all(color: Colors.black12, width: 1)
-        ),
-        child: Center(
-            child: Text(
-              '아직 후기가 없어요! 😋',
-              style: TextStyle(fontSize: 25.0),
-            )
+    if(reviewsCount == 0){
+      return Center(
+        child: Container(
+          padding: EdgeInsets.all(20.0),
+          height: 600,
+          child: Text(
+            '아직 후기가 없어요! 😋',
+            style: TextStyle(fontSize: 25.0),
+          ),
         ),
       );
     }
     return ListView.builder(
       shrinkWrap: true, //list in list
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: reviews.length,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: reviews!.length,
       itemBuilder: (context, index) {
-        Review review = reviews[index];
+        Review review = reviews![index];
         List<String> images = [];
 
         var imageUrl = "";
@@ -279,6 +288,25 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
         );
       },
     );
+  }
+
+  Future<void> refreshList() async {
+    refreshKey.currentState?.show(atTop: false);
+    await Future.delayed(Duration(seconds: 0)); //thread sleep 같은 역할을 함.
+    String url = 'http://zepetto.synology.me:9090/api/shops/';
+    final response = await http.get(Uri.parse(url + widget.shopId.toString()));
+    var convertingData = utf8.decode(response.bodyBytes);
+    var _data = jsonDecode(convertingData)['data'];
+    if (response.statusCode == 200) {
+      setState(() {
+        var shop = Shop.fromJson(_data);
+        reviews = shop.reviews;
+        reviewsCount = shop.reviewsCount;
+      });
+    } else {
+      throw Exception('Failed to load Shop');
+    }
+    return;
   }
 
   Future<void> _launchUrl() async{
