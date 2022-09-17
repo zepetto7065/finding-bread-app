@@ -1,6 +1,5 @@
-import 'dart:io';
-
-import 'package:finding_bread_app/shop_list_page.dart';
+import 'package:finding_bread_app/home/shop_list_page.dart';
+import 'package:finding_bread_app/home/shop_request_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -20,10 +19,12 @@ class _IndexPageState extends State<IndexPage> {
 
   Widget _buildBody() {
 
-    return Center(
-      child: Container(
-          width: 250,
-          height: 150,
+    return GestureDetector(
+      onTap: (){
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -50,6 +51,7 @@ class _IndexPageState extends State<IndexPage> {
               ),
               Padding(padding: EdgeInsets.all(5.0)),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
                     width: 170,
@@ -66,44 +68,42 @@ class _IndexPageState extends State<IndexPage> {
                 ],
               ),
               Padding(padding: EdgeInsets.all(10.0)),
-              Text(
-                  '원하는 빵집을 요청할 수 있어요!',
-                style: TextStyle(
-                    fontSize: 10.0,
-                  decoration: TextDecoration.underline,
+              GestureDetector(
+                onTap: (){
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (context) =>
+                          ShopRequestPage())
+                  );
+                },
+                child: Text(
+                    '원하는 빵집을 요청할 수 있어요!',
+                  style: TextStyle(
+                      fontSize: 10.0,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               )
             ],
-          )),
+          ),
+        ),
+      ),
     );
   }
 
   void onGenerate() {
-    if(Platform.isAndroid){
-      Navigator.push(
-        context ,
-        MaterialPageRoute(builder: (context) => ShopListPage(_textController.text))
-      );
-    }
     Navigator.push(
-        context,
-      CupertinoPageRoute(builder: (context) => ShopListPage(_textController.text))
+      context ,
+      MaterialPageRoute(builder: (context) => ShopListPage(_textController.text.trim()))
     );
   }
 
   StatefulWidget _textField() {
-    if(Platform.isAndroid) {
       return TextField(
         controller: _textController,
         decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: '이름, 지역을 검색해주세요.'
-        ),
+            labelText: '이름/지역을 검색하세요'
+        )
       );
-    }
-    return CupertinoTextField(
-      controller: _textController,
-      keyboardType: TextInputType.text,
-    );
   }
 }

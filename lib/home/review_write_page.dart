@@ -31,12 +31,17 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar:  AppBar(
-        title: Text('후기'),
-        backgroundColor: Colors.brown,
+    return GestureDetector(
+      onTap: (){
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar:  AppBar(
+          title: Text('후기'),
+          backgroundColor: Colors.brown,
+        ),
+        body: buildBody(),
       ),
-      body: buildBody(),
     );
   }
 

@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:finding_bread_app/sign_up_page.dart';
+import 'package:finding_bread_app/tab_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 
 class LoginPage extends StatefulWidget {
+
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -18,11 +20,21 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.brown,
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: GestureDetector(
+        onTap: (){
+          FocusScope.of(context).unfocus();
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('너가 찾는 그 빵집, 궁금해?'),
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.brown,
+          ),
+          body: _buildBody(),
+        ),
       ),
-      body: _buildBody(),
     );
   }
 
@@ -108,9 +120,10 @@ class _LoginPageState extends State<LoginPage> {
       prefs.setInt('userId' ,jsonDecode(_text)['userId']);
       prefs.setString('email' ,jsonDecode(_text)['email']);
       prefs.setString('nickname' ,jsonDecode(_text)['nickname']);
-      final appToken = prefs.getString('token');
-
-      Navigator.pop(context, appToken);
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => TabPage()));
     }else{
       print('로그인 실패');
       showDialog(
