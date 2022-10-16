@@ -53,6 +53,16 @@ class _ShopRequestPageState extends State<ShopRequestPage> {
                   child: ElevatedButton(
                     child: Text('요청하기'),
                     onPressed: (){
+                      if(title.text == '' || content.text == ''){
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return const AlertDialog(
+                                content: Text('내용을 입력해주세요.')
+                              );
+                            });
+                        return;
+                      }
                       request();
                       Navigator.pop(context);
                     },
@@ -93,7 +103,7 @@ class _ShopRequestPageState extends State<ShopRequestPage> {
             return AlertDialog(
               content: Text('권한이 없습니다.'),
               actions: <Widget>[
-                FlatButton(
+                TextButton(
                   child: Text('OK'),
                   onPressed: () {
                     Navigator.pop(context, "OK");

@@ -2,16 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../main.dart';
-
-class AccountPage extends StatefulWidget {
-  const AccountPage({Key? key}) : super(key: key);
+class MyPage extends StatefulWidget {
+  const MyPage({Key? key}) : super(key: key);
 
   @override
-  State<AccountPage> createState() => _AccountPageState();
+  State<MyPage> createState() => _MyPageState();
 }
 
-class _AccountPageState extends State<AccountPage> {
+class _MyPageState extends State<MyPage> {
   Future<User>? user;
 
   Future<User> getToken() async {
@@ -54,7 +52,7 @@ class _AccountPageState extends State<AccountPage> {
       },
       child: Scaffold(
           appBar: AppBar(
-            title: Text('MyFB'),
+            title: Text('My Page'),
             automaticallyImplyLeading: false,
             backgroundColor: Colors.brown,
           ),
@@ -69,9 +67,13 @@ class _AccountPageState extends State<AccountPage> {
                       SizedBox(
                         width: 60.0,
                         height: 60.0,
-                        child: CircleAvatar(
-                          backgroundImage: NetworkImage('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOL8Ye-jw6iyBKmdD-PHzvBZgyAR0B4MuCOr2cysTlTw&s'),
-                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20.0),
+                      child: Image.asset(
+                        'images/profile.png',
+                        fit: BoxFit.cover,
+                      ),
+                    )
                       ),
                       Padding(padding: EdgeInsets.all(4.0)),
                       Text('${snapshot.data!.nickname}님'),
@@ -109,10 +111,14 @@ class _AccountPageState extends State<AccountPage> {
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     content: Text(
-                                        '1. 빵집을 찾는다.\n'
-                                        '2. 후기를 등록한다.\n'
-                                        '3. 맛난 빵집을 등록한다.'
-                                        ),
+                                        '▷빵집 검색\n'+
+                                        '* 더 빨리 가게를 찾고 싶다면 전체 가게명 입력하세요.\n'+
+                                        '▷빵집 등록 요청\n'+
+                                        '* 보고싶은 빵집이 없으면 \'Home - 원하는 빵집을 요청할 수 있어요!\'를 통해 요청주세요.\n'+
+                                        '▷후기\n'+
+                                        '* 후기 사진을 클릭하면 상세 이미지를 볼 수 있어요.',
+                                      style: TextStyle(fontSize: 12.0),
+                                    ),
                                     title: Text('이용가이드'),
                                   );
                                 }

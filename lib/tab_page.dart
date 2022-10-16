@@ -1,7 +1,7 @@
 import 'package:finding_bread_app/root_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'account/account_page.dart';
+import 'account/my_page.dart';
 
 class TabPage extends StatefulWidget {
 
@@ -17,7 +17,7 @@ class _TabPageState extends State<TabPage> {
   void initState() {
     _pages = [
       RootPage(),
-      AccountPage()
+      MyPage()
     ];
   }
 
@@ -32,7 +32,7 @@ class _TabPageState extends State<TabPage> {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle), label: 'acoount')
+              icon: Icon(Icons.account_circle), label: 'My Page')
         ],
       ),
     );

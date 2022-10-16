@@ -40,7 +40,7 @@ class _IndexPageState extends State<IndexPage> {
               ),
               Padding(padding: EdgeInsets.all(5.0)),
               Text(
-                '빵집을 찾아드립니다',
+                '너가 찾는 그 빵, 궁금해?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -62,6 +62,17 @@ class _IndexPageState extends State<IndexPage> {
                   ElevatedButton(
                     child: Text('검색'),
                     onPressed: () {
+                      if(_textController.text == ''){
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                content: Text('검색어를 입력해주세요.'),
+                              );
+                            }
+                        );
+                        return;
+                      }
                       onGenerate();
                     },
                   )
@@ -102,7 +113,7 @@ class _IndexPageState extends State<IndexPage> {
         controller: _textController,
         decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: '이름/지역을 검색하세요'
+            labelText: '빵집/지역을 검색하세요'
         )
       );
   }

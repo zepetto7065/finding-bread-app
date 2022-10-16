@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:finding_bread_app/login_page.dart';
 import 'package:finding_bread_app/root_page.dart';
+import 'package:finding_bread_app/splash_page.dart';
 import 'package:finding_bread_app/tab_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
             )
         ),
         home: Container(
-          child: LoginPage(),
+          child: SplashPage(),
         ),
       );
   }

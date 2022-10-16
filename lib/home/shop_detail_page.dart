@@ -5,6 +5,7 @@ import 'package:finding_bread_app/root_page.dart';
 import 'package:finding_bread_app/tab_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
@@ -64,10 +65,12 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
         } else if (snapshot.hasError) {
           return Text('${snapshot.error} 에러!!');
         }
-        return const SizedBox(
-            height: 10.0,
-            width: 10.0,
-            child: CircularProgressIndicator()
+        return SpinKitWave(
+          itemBuilder: (BuildContext context, int index){
+            return DecoratedBox(decoration: BoxDecoration(
+                color: index.isEven ? Colors.brown : Colors.white
+            ));
+          },
         );
       },
     );
@@ -93,10 +96,10 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
             children: [
               Center(
                 child: SizedBox(
-                    child: Image.network(
-                        "https://finding-bread-app.s3.ap-northeast-2.amazonaws.com/review/118_1662629387789782.jpg",
-                        fit: BoxFit.fill,
-                    ),
+                    child:  Image.asset(
+                      'images/no_shop.png',
+                      fit: BoxFit.fill,
+                    )
 
                 ),
               ),
@@ -212,7 +215,7 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
 
         var imageUrl = "";
         if(review.imageUrl == null || review.imageUrl == '' ){
-          imageUrl = "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000";
+          imageUrl = "https://finding-bread-app.s3.ap-northeast-2.amazonaws.com/default/review.png";
           images.add(imageUrl);
         }else{
           var split = review.imageUrl!.split("|");
