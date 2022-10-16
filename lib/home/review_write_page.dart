@@ -184,7 +184,7 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
                       borderRadius: BorderRadius.circular(20.0),
                       child: Image.file(_image1!)
                   ),
-                ) : Text('사진을 추가해주세요!') ,
+                ) : Text('사진을 추가해주세요! (최대 3장)') ,
                 Padding(padding: EdgeInsets.all(2.0)),
                 _image2 != null ? SizedBox(
                   width: 60,
@@ -213,8 +213,29 @@ class _ReviewWritePageState extends State<ReviewWritePage> {
                   if(_image1 != null || _image1 != ''){
                     postImageRequest();
                   }
-                  _postReviewRequest(widget.id);
-                  Navigator.pop(context);
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          content: Text('후기를 등록하시겠습니까?'),
+                          actions: [
+                            TextButton(
+                              child: Text('등록'),
+                              onPressed: () {
+                                _postReviewRequest(widget.id);
+                                Navigator.pop(context);
+                              },
+                            ),
+                            TextButton(
+                              child: Text('취소'),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        );
+                      }
+                  );
                 },
               ),
             )

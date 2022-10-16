@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:finding_bread_app/home/shop_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 
 class ShopListPage extends StatefulWidget {
@@ -42,10 +44,12 @@ class _ShopListPageState extends State<ShopListPage> {
           } else if (snapshot.hasError) {
             return Text('${snapshot.error} 에러!!');
           }
-          return const SizedBox(
-              height: 10.0,
-              width: 10.0,
-              child: CircularProgressIndicator()
+          return SpinKitWave(
+            itemBuilder: (BuildContext context, int index){
+              return DecoratedBox(decoration: BoxDecoration(
+                color: index.isEven ? Colors.brown : Colors.white
+              ));
+            },
           );
         },
     );
@@ -88,8 +92,9 @@ class _ShopListPageState extends State<ShopListPage> {
                 SizedBox(
                     width: 70.0,
                     height: 70.0,
-                    child: Image.network(
-                        "https://img.freepik.com/premium-vector/hand-drawn-bread-and-bakery-vector-illustration-with-colorful_266639-1983.jpg?w=2000")
+                    child: Image.asset(
+                        'images/shop.png',
+                    )
                 ),
                 SizedBox(
                   width: 220,

@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
                     controller: email,
                     decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        labelText: '아이디 입력'
+                        labelText: '이메일 입력'
                     ),
                   ),
                   Padding(padding: EdgeInsets.all(4.0)),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -14,10 +15,24 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController passwordChecker = TextEditingController();
   TextEditingController userName = TextEditingController();
   TextEditingController nickname = TextEditingController();
+  TextEditingController authNum = TextEditingController();
 
+  bool isDuplicateEmailCheck = false;
   bool isPasswordEnable = false;
   bool isCheckPasswordEnable = false;
 
+  int timerCount = 0;
+  Timer? timer;
+  bool isTimerRunning = false;
+
+  var emailAuthNum;
+
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +68,13 @@ class _SignUpPageState extends State<SignUpPage> {
                   SizedBox(
                     height: 40.0,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         SizedBox(
                           width:210.0,
                           child: TextField(
                             controller: email,
+                            enabled: isDuplicateEmailCheck == false ? true : false,
                             decoration: InputDecoration(
                                 border: OutlineInputBorder(),
                                 labelText: '아이디 입력'
@@ -67,19 +84,87 @@ class _SignUpPageState extends State<SignUpPage> {
                         Padding(padding: EdgeInsets.only(left:8.0)),
                         ElevatedButton(
                             onPressed: () async {
-                              bool isValidEmail = await validateEmail();
-                              if(isValidEmail){
-                                setState((){
-                                  isPasswordEnable = true;
-                                  isCheckPasswordEnable = true;
+                              bool isAvailable = await emailCheck();
+
+                              setState(() {
+                                timerCount = 180;
+                                isDuplicateEmailCheck = isAvailable;
+                              });
+
+                              timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+                                setState(() {
+                                  timerCount--;
+                                  if(timerCount == 0){
+                                    timer.cancel();
+                                  }
                                 });
-                              }
+                              });
                             },
-                            child: Text('인증하기'))
+                            child: isDuplicateEmailCheck == false ? Text('인증') : Text('재전송'))
                       ],
                     ),
-
                   ),
+                Padding(padding: EdgeInsets.all(4.0)),
+                isDuplicateEmailCheck == true ?
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children : [
+                    Stack (
+                      alignment: Alignment.centerRight,
+                      children : [
+                          SizedBox(
+                            width: 210.0,
+                            height: 40.0,
+                            child: TextField(
+                              controller: authNum,
+                              decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: '인증번호 입력'),
+                            ),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text('$timerCount'),
+                        ),
+                      ],
+                    ),
+                    const Padding(padding: EdgeInsets.only(left:8.0)),
+                    ElevatedButton(
+                        onPressed: () async {
+                          if(timerCount == 0){
+                            showDialog(context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    content: Text('인증시간이 초과되었습니다.'),
+                                  );
+                                });
+                            return;
+                          }
+                          if(emailAuthNum.toString() == authNum.text){
+                            setState((){
+                              isPasswordEnable = true;
+                              isCheckPasswordEnable = true;
+                              isDuplicateEmailCheck = false;
+                              timer?.cancel();
+                            });
+                            showDialog(context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    content: Text('이메일 인증이 완료되었습니다.'),
+                                  );
+                                });
+                          }else{
+                            showDialog(context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    content: Text('인증번호가 동일하지 않습니다.'),
+                                  );
+                              });
+                          }
+                        },
+                      child: Text('확인'))
+                  ]
+                ) : SizedBox(),
                 Padding(padding: EdgeInsets.all(2.0)),
                 Text('비밀번호',
                   style: TextStyle(
@@ -175,7 +260,7 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Future<bool> validateEmail() async {
+  Future<bool> emailCheck() async {
     var validEmailFormat = isValidEmailFormat(email.text);
 
     if(email.text == "" || !validEmailFormat){
@@ -183,15 +268,17 @@ class _SignUpPageState extends State<SignUpPage> {
       return false;
     }
 
-    var hasEmail = await _duplicateEmailCheck();
+    var response = await requestApi();
+    var statusCode = jsonDecode(response)['code'];
 
-    if(hasEmail) {
+    if(statusCode == 'ERR0001'){
       showAlertDialog(context,"동일한 Email 이 존재합니다.");
       return false;
-    }else{
-      showAlertDialog(context,"사용 가능한 Email 입니다.");
-      return true;
     }
+    setState(() {
+      emailAuthNum = jsonDecode(response)['data'];
+    });
+    return true;
   }
 
   Future<void> _signupRequest() async {
@@ -213,12 +300,10 @@ class _SignUpPageState extends State<SignUpPage> {
     return jsonDecode(utf8.decode(response.bodyBytes));
   }
 
-  Future<bool> _duplicateEmailCheck() async {
-    String url = 'http://zepetto.synology.me:9090/api/user/is?email=';
+  Future<String> requestApi() async {
+    String url = 'http://zepetto.synology.me:9090/api/user/signup/available?email=';
     http.Response response = await http.get(Uri.parse(url + email.text));
-    var _text = utf8.decode(response.bodyBytes);
-
-    return jsonDecode(_text)['data'] as bool;
+    return utf8.decode(response.bodyBytes);
   }
 
   void showAlertDialog(BuildContext context, String text) async {
@@ -284,6 +369,10 @@ class _SignUpPageState extends State<SignUpPage> {
       return false;
     }
 
+    return true;
+  }
+
+  bool authNumCheck() {
     return true;
   }
 
