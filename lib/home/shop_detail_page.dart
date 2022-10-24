@@ -253,7 +253,7 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
                 ),
               ),
               SizedBox(
-                  width: 60.0,
+                  width:  80.0,
                   height: 60.0,
                   child: InkWell(
                     onTap: (){
@@ -262,24 +262,37 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
                           barrierDismissible: true, // 바깥 영역 터치시 닫을지 여부
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                              ),
-                              content:  Swiper(
-                                    itemBuilder: (context, index) {
-                                      final url = images[index];
-                                      return Image.network(url);
-                                    },
-                                    indicatorLayout: PageIndicatorLayout.COLOR,
-                                    autoplay: false,
-                                    itemCount: images.length,
-                                    pagination: const SwiperPagination(),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(6.0)),
+                                ),
+                                content: Container(
+                                  height:
+                                      MediaQuery.of(context).size.height / 3,
+                                  width: MediaQuery.of(context).size.width,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(2.0),
+                                    child: Swiper(
+                                      itemBuilder: (context, index) {
+                                        final url = images[index];
+                                        return Image.network(
+                                          url,
+                                          fit: BoxFit.contain,
+                                        );
+                                      },
+                                      indicatorLayout:
+                                          PageIndicatorLayout.COLOR,
+                                      autoplay: false,
+                                      itemCount: images.length,
+                                      scale: 0.9,
+                                      viewportFraction: 0.8,
+                                      pagination: const SwiperPagination(),
+                                    ),
                                   ),
-                              );
-                          }
-                      );                    },
+                                ));
+                          });
+                  },
                     child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20.0),
+                              // borderRadius: BorderRadius.circular(20.0),
                               child: Image.network(
                                 imageUrl,
                               ),
