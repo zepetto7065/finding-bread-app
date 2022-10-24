@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_expanded_tile/flutter_expanded_tile.dart';
 import 'package:http/http.dart' as http;
 
 class SignUpPage extends StatefulWidget {
@@ -18,6 +20,7 @@ class _SignUpPageState extends State<SignUpPage> {
   TextEditingController authNum = TextEditingController();
 
   bool isDuplicateEmailCheck = false;
+  bool isExitEmailCheck = false;
   bool isPasswordEnable = false;
   bool isCheckPasswordEnable = false;
 
@@ -25,8 +28,23 @@ class _SignUpPageState extends State<SignUpPage> {
   Timer? timer;
   bool isTimerRunning = false;
 
-  var emailAuthNum;
+  bool isTermsChecked = false;
 
+  var emailAuthNum;
+  ExpandedTileController expandedTileController = ExpandedTileController(isExpanded: false);
+  String privateInfoTerms = "";
+
+  getPrivateInfoTerms() async {
+    String response = await rootBundle.loadString('texts/private_info_terms');
+    setState(() {
+      privateInfoTerms = response;
+    });
+  }
+
+  @override
+  void initState() {
+    getPrivateInfoTerms();
+  }
 
   @override
   void dispose() {
@@ -71,17 +89,17 @@ class _SignUpPageState extends State<SignUpPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         SizedBox(
-                          width:210.0,
+                          width:225.0,
                           child: TextField(
                             controller: email,
-                            enabled: isDuplicateEmailCheck == false ? true : false,
-                            decoration: InputDecoration(
+                            enabled: isExitEmailCheck == false  ? true : false,
+                            decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                                 labelText: '아이디 입력'
                             ),
                           ),
                         ),
-                        Padding(padding: EdgeInsets.only(left:8.0)),
+                        const Padding(padding: EdgeInsets.only(left:8.0)),
                         ElevatedButton(
                             onPressed: () async {
                               bool isAvailable = await emailCheck();
@@ -89,9 +107,10 @@ class _SignUpPageState extends State<SignUpPage> {
                               setState(() {
                                 timerCount = 180;
                                 isDuplicateEmailCheck = isAvailable;
+                                isExitEmailCheck = true;
                               });
 
-                              timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+                              timer = Timer.periodic(const Duration(seconds: 1), (timer) {
                                 setState(() {
                                   timerCount--;
                                   if(timerCount == 0){
@@ -100,11 +119,11 @@ class _SignUpPageState extends State<SignUpPage> {
                                 });
                               });
                             },
-                            child: isDuplicateEmailCheck == false ? Text('인증') : Text('재전송'))
+                            child: isDuplicateEmailCheck == false ? Text('인증') : Text('재전송') )
                       ],
                     ),
                   ),
-                Padding(padding: EdgeInsets.all(4.0)),
+                const Padding(padding: EdgeInsets.all(4.0)),
                 isDuplicateEmailCheck == true ?
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -234,7 +253,27 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ),
                 Padding(padding: EdgeInsets.all(4.0)),
-
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isTermsChecked,
+                      onChanged: (value){
+                        setState(() {
+                          isTermsChecked = value!;
+                        });
+                      },
+                      //
+                    ),
+                    const Text('전체동의',style: TextStyle(fontSize: 20.0 )),
+                  ],
+                ),
+                ExpandedTile(
+                  onTap: (){},
+                  title: Text('개인정보 수집 및 이용 동의'),
+                  controller: expandedTileController,
+                  content: Text(privateInfoTerms),
+                ),
+                Padding(padding: EdgeInsets.all(4.0)),
                 Center(
                     child: ElevatedButton(
                         onPressed : () async {
@@ -366,6 +405,11 @@ class _SignUpPageState extends State<SignUpPage> {
         isValidSpecialCharFormat(nickname.text) ||
         nickname.text.length > 10) {
       showAlertDialog(context, '이름과 닉네임은 특수문자를 제외한 10자 내외로 입력하세요.');
+      return false;
+    }
+
+    if(!isTermsChecked){
+      showAlertDialog(context, '개인정보처리방침 동의 체크를 해주세요.');
       return false;
     }
 

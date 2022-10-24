@@ -1,5 +1,7 @@
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyPage extends StatefulWidget {
@@ -11,6 +13,8 @@ class MyPage extends StatefulWidget {
 
 class _MyPageState extends State<MyPage> {
   Future<User>? user;
+  String terms = "";
+  String notice = "";
 
   Future<User> getToken() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance() ;
@@ -20,10 +24,20 @@ class _MyPageState extends State<MyPage> {
     return User(token,email,nickname);
   }
 
+  getTextInfo() async {
+    String response_terms = await rootBundle.loadString('texts/comm_terms');
+    String response_notice = await rootBundle.loadString('texts/notice');
+    setState(() {
+      terms = response_terms;
+      notice = response_notice;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     user = getToken();
+    getTextInfo();
   }
 
   @override
@@ -79,7 +93,7 @@ class _MyPageState extends State<MyPage> {
                       Text('${snapshot.data!.nickname}님'),
                     ],
                   ),
-                  Padding(padding: EdgeInsets.all(4.0)),
+                  const Padding(padding: EdgeInsets.all(4.0)),
                   Expanded(
                     child: ListView(
                       padding: EdgeInsets.all(8.0),
@@ -91,13 +105,10 @@ class _MyPageState extends State<MyPage> {
                                   builder: (BuildContext context) {
                                     return AlertDialog(
                                       content: Text(
-                                          '안녕하세요.\n'
-                                          'Finding Bread ver 1.0.0을 Open 하였습니다.\n'
-                                          '항상 발전하는 서비스가 되겠습니다. \n'
-                                          'Finding Bread을 이용해주셔서 감사합니다.',
+                                        notice,
                                         style: TextStyle(fontSize: 12.0),
                                       ),
-                                      title: Text('공지사항'),
+                                      title: const Text('공지사항'),
                                     );
                                   }
                               );
@@ -131,8 +142,20 @@ class _MyPageState extends State<MyPage> {
                             showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    content: Text('약관입니다.'),
+                                  return SingleChildScrollView(
+                                    child: AlertDialog(
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context); //close Dialog
+                                          },
+                                          child: Text('Close'),
+                                        ),
+                                      ],
+                                      content: Text(terms,
+                                        style: const TextStyle(fontSize: 12.0)
+                                      ),
+                                    ),
                                   );
                                 }
                             );
@@ -151,7 +174,7 @@ class _MyPageState extends State<MyPage> {
                         child:  Text('로그아웃')
                     ),
                   ),
-                  Padding(padding: EdgeInsets.all(10.0)),
+                  Padding(padding: const EdgeInsets.all(10.0)),
                 ],
               )
           ),
@@ -163,7 +186,6 @@ class _MyPageState extends State<MyPage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance() ;
     prefs.clear();
   }
-
 }
 
 class User{
